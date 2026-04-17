@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>GYM Angel - Tu compañero de entrenamiento</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: system-ui, 'Segoe UI', 'Poppins', 'Roboto', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(145deg, #0a0f1e 0%, #0c1222 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            position: relative;
+        }
+
+        /* Partículas de fondo */
+        .particle {
+            position: fixed;
+            background: rgba(0, 198, 255, 0.3);
+            border-radius: 50%;
+            pointer-events: none;
+            animation: float 20s infinite linear;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 0.5;
+            }
+            90% {
+                opacity: 0.5;
+            }
+            100% {
+                transform: translateY(-100vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        /* Pantallas */
+        .screen {
+            background: rgba(18, 25, 45, 0.9);
+            backdrop-filter: blur(12px);
+            border-radius: 48px;
+            box-shadow: 0 25px 45px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(0, 255, 255, 0.15);
+            width: 100%;
+            max-width: 550px;
+            min-height: 650px;
+            transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            padding: 30px 24px 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* Tipografía y colores */
+        .title-main {
+            font-size: 64px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #00c6ff, #0072ff, #00ff88);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 0 2px 10px rgba(0,198,255,0.3);
+            letter-spacing: 2px;
+            text-align: center;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.9;
+                text-shadow: 0 0 20px rgba(0,198,255,0.5);
+            }
+        }
+
+        .glow-text {
+            color: #b0e0ff;
+            font-weight: 600;
+        }
+
+        label, .label-light {
+            color: #ccdeee;
+            font-weight: 500;
+            margin-bottom: 6px;
+            font-size: 0.95rem;
+        }
+
+        input, select {
+            background: #1e2a3a;
+            border: 1px solid #2d4a6e;
+            border-radius: 60px;
+            padding: 14px 20px;
+            font-size: 1rem;
+            color: white;
+            outline: none;
+            transition: all 0.3s;
+            width: 100%;
+        }
+
+        input:focus, select:focus {
+            border-color: #00a6ff;
+            box-shadow: 0 0 15px #00a6ff80;
+            transform: scale(1.02);
+        }
+
+        button {
+            background: linear-gradient(95deg, #0066ff, #00c3ff);
+            border: none;
+            border-radius: 60px;
+            padding: 14px 20px;
+            font-weight: bold;
+            font-size: 1.2rem;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 6px 14px rgba(0,100,255,0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        button::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        button:active::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0,100,255,0.4);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(95deg, #ff4757, #ff6b81);
+            box-shadow: 0 6px 14px rgba(255, 70, 70, 0.3);
+        }
+
+        .btn-success {
+            background: linear-gradient(95deg, #00b894, #00cec9);
+            box-shadow: 0 6px 14px rgba(0, 184, 148, 0.3);
+        }
+
+        /* Grid de rutina */
+        .rutina-grid {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 12px 12px;
+            background: #0f172acc;
+            border-radius: 32px;
+            padding: 16px;
+            margin: 15px 0;
+            max-height: 380px;
+            overflow-y: auto;
+        }
+
+        .rutina-grid::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .rutina-grid::-webkit-scrollbar-track {
+            background: #1e2a3a;
+            border-radius: 10px;
+        }
+
+        .rutina-grid::-webkit-scrollbar-thumb {
+            background: #00a6ff;
+            border-radius: 10px;
+        }
+
+        .dia-item {
+            font-weight: 800;
+            color: #7aaef5;
+            font-size: 1.1rem;
+            padding: 8px 5px;
+        }
+
+        .ejercicio-item {
+            background: #111c2c;
+            padding: 8px 12px;
+            border-radius: 20px;
+            color: #f0f3f8;
+            font-size: 0.9rem;
+            word-break: break-word;
+            border-left: 4px solid #00a6ff;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .ejercicio-item:hover {
+            transform: translateX(5px);
+            background: #162536;
+        }
+
+        .reloj-grande {
+            font-size: 54px;
+            font-family: monospace;
+            font-weight: bold;
+            background: linear-gradient(135deg, #00000066, #00000033);
+            text-align: center;
+            border-radius: 60px;
+            padding: 12px;
+            letter-spacing: 4px;
+            color: #f7d44a;
+            text-shadow: 0 0 10px rgba(247, 212, 74, 0.5);
+            margin-bottom: 10px;
+        }
+
+        .stats-bar {
+            display: flex;
+            justify-content: space-between;
+            background: #0f172a99;
+            border-radius: 40px;
+            padding: 12px 20px;
+            margin-bottom: 15px;
+            font-size: 0.9rem;
+        }
+
+        .stat-item {
+            text-align: center;
+            color: #ccdeee;
+        }
+
+        .stat-value {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #00a6ff;
+        }
+
+        .flex-buttons {
+            display: flex;
+            gap: 14px;
+            margin-top: 12px;
+        }
+
+        .center-text {
+            text-align: center;
+        }
+
+        /* Animaciones */
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        .shake {
+            animation: shake 0.3s ease-in-out;
+        }
+
+        /* Notificaciones */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 60px;
+            font-size: 0.9rem;
+            z-index: 1000;
+            animation: slideUp 0.3s ease-out;
+            pointer-events: none;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateX(-50%) translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(-50%) translateY(0);
+            }
+        }
+
+        /* Checkbox personalizado para completar ejercicios */
+        .exercise-checkbox {
+            margin-right: 8px;
+            transform: scale(1.2);
+            cursor: pointer;
+            accent-color: #00a6ff;
+        }
+
+        .completed {
+            text-decoration: line-through;
+            opacity: 0.6;
+        }
+    </style>
+</head>
+<body>
+<div id="appRoot">
+    <!-- Pantalla INICIO -->
+    <div id="screenInicio" class="screen">
+        <div style="flex:1; display: flex; flex-direction: column; justify-content: center; gap: 30px;">
+            <div class="title-main">💪 GYM ANGEL</div>
+            <div style="text-align: center; color: #ccdeee; font-size: 1rem;">Tu compañero de entrenamiento personal</div>
+            <button id="btnEntrar">COMENZAR</button>
+        </div>
+    </div>
+
+    <!-- Pantalla FORMULARIO (perfil) -->
+    <div id="screenFormulario" class="screen hidden">
+        <div style="flex:1">
+            <h2 style="color:white; margin-bottom: 30px; text-align:center;">⚡ CONFIGURA TU PERFIL</h2>
+            <div style="margin-bottom: 20px;">
+                <label>🏋️ Tu nombre</label>
+                <input type="text" id="inputNombre" placeholder="Ej: Ángel, Marta..." autocomplete="off">
+            </div>
+            <div style="margin-bottom: 35px;">
+                <label>📍 Lugar de entrenamiento</label>
+                <select id="selectLugar">
+                    <option value="Casa">🏠 Casa</option>
+                    <option value="Gym">🏢 Gimnasio</option>
+                </select>
+            </div>
+            <button id="btnVerRutina">VER RUTINA</button>
+        </div>
+        <div class="center-text" style="margin-top: 20px; color:#6c86a3;">Comienza tu transformación 💪</div>
+    </div>
+
+    <!-- Pantalla CALENDARIO (rutina semanal + cronómetro) -->
+    <div id="screenCalendario" class="screen hidden">
+        <div style="flex:1; display: flex; flex-direction: column;">
+            <h2 style="color:white; text-align:center; margin-bottom: 8px;">📆 MI RUTINA SEMANAL</h2>
+            <div class="stats-bar">
+                <div class="stat-item">
+                    <div>Nivel</div>
+                    <div class="stat-value" id="nivelDisplay">1</div>
+                </div>
+                <div class="stat-item">
+                    <div>Ejercicios</div>
+                    <div class="stat-value" id="ejerciciosCompletados">0/7</div>
+                </div>
+                <div class="stat-item">
+                    <div>Racha 🔥</div>
+                    <div class="stat-value" id="rachaDisplay">0</div>
+                </div>
+            </div>
+            <div class="reloj-grande" id="cronometroDisplay">00:00</div>
+            <div id="rutinaContainer" class="rutina-grid">
+                <div class="dia-item">Lun</div><div class="ejercicio-item">Cargando...</div>
+            </div>
+            <div class="flex-buttons">
+                <button id="btnIniciarPausar" style="flex:1;">▶ INICIAR</button>
+                <button id="btnTerminarSemana" class="btn-secondary" style="flex:1;">✅ TERMINAR</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pantalla PROGRESO / Subir nivel -->
+    <div id="screenProgreso" class="screen hidden">
+        <div style="flex:1; text-align: center; display: flex; flex-direction: column; justify-content: center; gap: 25px;">
+            <div style="font-size: 80px; animation: bounce 0.5s;">🏆</div>
+            <div style="font-size: 32px; font-weight: bold; background: linear-gradient(135deg,#2ecc71,#27ae60); -webkit-background-clip: text; background-clip: text; color: transparent;">¡EXCELENTE!</div>
+            <div id="infoNivel" style="font-size: 22px; color: #cdedff;">Nivel 1 completado</div>
+            <div id="statsResumen" style="font-size: 14px; color: #88aaff;"></div>
+            <button id="btnSubirNivel" class="btn-success">SUBIR NIVEL ➕</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ---------- CONFIGURACIÓN ----------
+    const RUTINAS = {
+        "Casa": ["Sentadillas", "Flexiones", "Zancadas", "Plancha", "Burpees", "Yoga", "Descanso"],
+        "Gym": ["Prensa de Pierna", "Press Banca", "Peso Muerto", "Polea al Pecho", "Cinta", "Sauna", "Descanso"]
+    };
+    const DIAS = ["Lun", "Mar", "Mie", "Jue", "Vie", "Sab", "Dom"];
+
+    // Estado global
+    let appState = {
+        nivel: 1,
+        userName: "",
+        lugar: "Casa",
+        racha: 0,
+        historial: []
+    };
+
+    // Variables del cronómetro
+    let tiempoSegundos = 0;
+    let intervalCronometro = null;
+    let ejerciciosCompletados = new Array(7).fill(false);
+
+    // Referencias DOM
+    const screenInicio = document.getElementById('screenInicio');
+    const screenFormulario = document.getElementById('screenFormulario');
+    const screenCalendario = document.getElementById('screenCalendario');
+    const screenProgreso = document.getElementById('screenProgreso');
+    const btnEntrar = document.getElementById('btnEntrar');
+    const btnVerRutina = document.getElementById('btnVerRutina');
+    const btnTerminarSemana = document.getElementById('btnTerminarSemana');
+    const btnSubirNivel = document.getElementById('btnSubirNivel');
+    const btnIniciarPausar = document.getElementById('btnIniciarPausar');
+    const cronometroDisplay = document.getElementById('cronometroDisplay');
+    const rutinaContainer = document.getElementById('rutinaContainer');
+    const inputNombre = document.getElementById('inputNombre');
+    const selectLugar = document.getElementById('selectLugar');
+    const infoNivelSpan = document.getElementById('infoNivel');
+    const nivelDisplay = document.getElementById('nivelDisplay');
+    const ejerciciosCompletadosSpan = document.getElementById('ejerciciosCompletados');
+    const rachaDisplay = document.getElementById('rachaDisplay');
+    const statsResumen = document.getElementById('statsResumen');
+
+    // Mostrar notificación
+    function mostrarNotificacion(mensaje, esExito = true) {
+        const toast = document.createElement('div');
+        toast.className = 'toast';
+        toast.textContent = mensaje;
+        toast.style.background = esExito ? 'rgba(0, 184, 148, 0.95)' : 'rgba(255, 71, 87, 0.95)';
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 2000);
+    }
+
+    // Almacenamiento
+    function guardarProgresoCompleto() {
+        const data = {
+            nivel: appState.nivel,
+            nombre: appState.userName,
+            lugar: appState.lugar,
+            racha: appState.racha,
+            historial: appState.historial
+        };
+        localStorage.setItem("gym_progreso", JSON.stringify(data));
+    }
+
+    function cargarProgreso() {
+        const raw = localStorage.getItem("gym_progreso");
+        if (raw) {
+            try {
+                const data = JSON.parse(raw);
+                appState.nivel = data.nivel || 1;
+                appState.userName = data.nombre || "";
+                appState.lugar = data.lugar || "Casa";
+                appState.racha = data.racha || 0;
+                appState.historial = data.historial || [];
+            } catch(e) { console.warn(e); }
+        }
+        if (inputNombre) inputNombre.value = appState.userName;
+        if (selectLugar) selectLugar.value = appState.lugar;
+        if (nivelDisplay) nivelDisplay.textContent = appState.nivel;
+        if (rachaDisplay) rachaDisplay.textContent = appState.racha;
+    }
+
+    // Actualizar rutina con checkboxes
+    function actualizarRutina() {
+        const lugarActual = appState.lugar;
+        let ejerciciosBase = [...(RUTINAS[lugarActual] || RUTINAS["Casa"])];
+        while(ejerciciosBase.length < 7) ejerciciosBase.push("Descanso");
+        
+        const series = 2 + appState.nivel;
+        const reps = 8 + (appState.nivel * 2);
+        
+        rutinaContainer.innerHTML = '';
+        let contadorCompletados = 0;
+        
+        for (let i = 0; i < 7; i++) {
+            const ejercicio = ejerciciosBase[i];
+            const diaNombre = DIAS[i];
+            const estaCompletado = ejerciciosCompletados[i];
+            if (estaCompletado) contadorCompletados++;
+            
+            const divDia = document.createElement('div');
+            divDia.className = 'dia-item';
+            divDia.innerText = diaNombre;
+            
+            const divEj = document.createElement('div');
+            divEj.className = 'ejercicio-item';
+            if (estaCompletado) divEj.classList.add('completed');
+            
+            if (ejercicio !== "Descanso") {
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.className = 'exercise-checkbox';
+                checkbox.checked = estaCompletado;
+                checkbox.addEventListener('change', (e) => {
+                    e.stopPropagation();
+                    ejerciciosCompletados[i] = checkbox.checked;
+                    actualizarRutina();
+                    actualizarContadorEjercicios();
+                    if (checkbox.checked) {
+                        mostrarNotificacion(`✅ ¡Completaste ${ejercicio}!`, true);
+                    }
+                });
+                
+                divEj.innerHTML = '';
+                divEj.appendChild(checkbox);
+                divEj.appendChild(document.createTextNode(` ${ejercicio}  `));
+                const spanDetalle = document.createElement('span');
+                spanDetalle.style.fontSize = '0.7rem';
+                spanDetalle.style.color = '#88aaff';
+                spanDetalle.innerHTML = `<br>⚡ ${series} series x ${reps} reps`;
+                divEj.appendChild(spanDetalle);
+            } else {
+                divEj.innerHTML = `😴 Descanso total`;
+                divEj.style.borderLeftColor = "#f39c12";
+            }
+            
+            rutinaContainer.appendChild(divDia);
+            rutinaContainer.appendChild(divEj);
+        }
+        
+        ejerciciosCompletadosSpan.textContent = `${contadorCompletados}/7`;
+        
+        // Si todos los ejercicios están completados, mostrar mensaje especial
+        if (contadorCompletados === 7) {
+            mostrarNotificacion("🎉 ¡Completaste todos los ejercicios de la semana! 🎉", true);
+        }
+    }
+    
+    function actualizarContadorEjercicios() {
+        const completados = ejerciciosCompletados.filter(c => c === true).length;
+        ejerciciosCompletadosSpan.textContent = `${completados}/7`;
+    }
+
+    function refreshCalendarioUI() {
+        // Resetear ejercicios completados al entrar a nueva semana
+        ejerciciosCompletados = new Array(7).fill(false);
+        actualizarRutina();
+        detenerCronometro();
+        tiempoSegundos = 0;
+        actualizarDisplayCronometro();
+        if(btnIniciarPausar) {
+            btnIniciarPausar.innerHTML = "▶ INICIAR";
+            btnIniciarPausar.style.background = "linear-gradient(95deg, #0066ff, #00c3ff)";
+        }
+        if(nivelDisplay) nivelDisplay.textContent = appState.nivel;
+        if(rachaDisplay) rachaDisplay.textContent = appState.racha;
+    }
+
+    // Cronómetro
+    function actualizarDisplayCronometro() {
+        const mins = Math.floor(tiempoSegundos / 60);
+        const segs = tiempoSegundos % 60;
+        cronometroDisplay.innerText = `${mins.toString().padStart(2,'0')}:${segs.toString().padStart(2,'0')}`;
+    }
+
+    function tickCronometro() {
+        tiempoSegundos++;
+        actualizarDisplayCronometro();
+    }
+
+    function iniciarCronometro() {
+        if (intervalCronometro) clearInterval(intervalCronometro);
+        intervalCronometro = setInterval(tickCronometro, 1000);
+    }
+
+    function detenerCronometro() {
+        if (intervalCronometro) {
+            clearInterval(intervalCronometro);
+            intervalCronometro = null;
+        }
+    }
+
+    function toggleCronometro() {
+        if (intervalCronometro) {
+            detenerCronometro();
+            btnIniciarPausar.innerHTML = "▶ INICIAR";
+            btnIniciarPausar.style.background = "linear-gradient(95deg, #0066ff, #00c3ff)";
+        } else {
+            iniciarCronometro();
+            btnIniciarPausar.innerHTML = "⏸ PAUSAR";
+            btnIniciarPausar.style.background = "linear-gradient(95deg, #f39c12, #e67e22)";
+        }
+    }
+
+    // Terminar semana
+    function terminarSemana() {
+        const completados = ejerciciosCompletados.filter(c => c === true).length;
+        const porcentaje = (completados / 7) * 100;
+        
+        detenerCronometro();
+        
+        if (porcentaje >= 70) {
+            appState.racha++;
+            mostrarNotificacion(`🔥 ¡Excelente semana! Racha: ${appState.racha} semanas`, true);
+        } else {
+            if (appState.racha > 0) {
+                mostrarNotificacion(`😅 Semana regular. Racha perdida.`, false);
+            }
+            appState.racha = 0;
+        }
+        
+        appState.historial.push({
+            fecha: new Date().toLocaleDateString(),
+            nivel: appState.nivel,
+            completados: completados,
+            porcentaje: porcentaje
+        });
+        
+        guardarProgresoCompleto();
+        
+        if (statsResumen) {
+            statsResumen.innerHTML = `Semana completada: ${completados}/7 ejercicios (${Math.round(porcentaje)}%)<br>Racha actual: ${appState.racha} 🔥`;
+        }
+        infoNivelSpan.innerText = `Nivel ${appState.nivel} completado.`;
+        cambiarPantalla('progreso');
+    }
+
+    // Subir nivel
+    function subirNivel() {
+        appState.nivel += 1;
+        guardarProgresoCompleto();
+        detenerCronometro();
+        tiempoSegundos = 0;
+        actualizarDisplayCronometro();
+        if(btnIniciarPausar) btnIniciarPausar.innerHTML = "▶ INICIAR";
+        actualizarRutina();
+        if(rachaDisplay) rachaDisplay.textContent = appState.racha;
+        if(nivelDisplay) nivelDisplay.textContent = appState.nivel;
+        mostrarNotificacion(`🎉 ¡Subiste al Nivel ${appState.nivel}! 🎉`, true);
+        cambiarPantalla('calendario');
+    }
+
+    // Cambio de pantalla
+    function cambiarPantalla(pantalla) {
+        screenInicio.classList.add('hidden');
+        screenFormulario.classList.add('hidden');
+        screenCalendario.classList.add('hidden');
+        screenProgreso.classList.add('hidden');
+        
+        if (pantalla === 'inicio') {
+            screenInicio.classList.remove('hidden');
+        } else if (pantalla === 'form') {
+            inputNombre.value = appState.userName;
+            selectLugar.value = appState.lugar;
+            screenFormulario.classList.remove('hidden');
+        } else if (pantalla === 'calendario') {
+            refreshCalendarioUI();
+            screenCalendario.classList.remove('hidden');
+        } else if (pantalla === 'progreso') {
+            if (rachaDisplay) rachaDisplay.textContent = appState.racha;
+            screenProgreso.classList.remove('hidden');
+        }
+    }
+
+    function guardarDesdeFormulario() {
+        let nombre = inputNombre.value.trim();
+        if (nombre === "") {
+            nombre = "Angel";
+            inputNombre.value = "Angel";
+        }
+        const lugar = selectLugar.value;
+        appState.userName = nombre;
+        appState.lugar = lugar;
+        guardarProgresoCompleto();
+        refreshCalendarioUI();
+        cambiarPantalla('calendario');
+        mostrarNotificacion(`¡Bienvenido ${nombre}! 💪`, true);
+    }
+
+    // Eventos
+    function initEventListeners() {
+        btnEntrar.addEventListener('click', () => cambiarPantalla('form'));
+        btnVerRutina.addEventListener('click', guardarDesdeFormulario);
+        btnTerminarSemana.addEventListener('click', terminarSemana);
+        btnSubirNivel.addEventListener('click', subirNivel);
+        btnIniciarPausar.addEventListener('click', toggleCronometro);
+    }
+
+    // Partículas de fondo
+    function crearParticulas() {
+        for(let i = 0; i < 30; i++) {
+            const particle = document.createElement('div');
+            particle.className = 'particle';
+            const size = Math.random() * 4 + 2;
+            particle.style.width = `${size}px`;
+            particle.style.height = `${size}px`;
+            particle.style.left = `${Math.random() * 100}%`;
+            particle.style.animationDuration = `${Math.random() * 10 + 10}s`;
+            particle.style.animationDelay = `${Math.random() * 10}s`;
+            document.body.appendChild(particle);
+        }
+    }
+
+    function initApp() {
+        cargarProgreso();
+        initEventListeners();
+        cambiarPantalla('inicio');
+        crearParticulas();
+        window.addEventListener('beforeunload', () => {
+            if(intervalCronometro) clearInterval(intervalCronometro);
+        });
+    }
+
+    initApp();
+</script>
+</body>
+</html>
